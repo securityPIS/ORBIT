@@ -35,7 +35,7 @@ export default function ReportsPage() {
           <div className="flex items-center justify-between border-b border-hair/60 pb-3">
             <div>
               <div className="text-[11px] uppercase tracking-[0.16em] text-brand">ORBIT · Intelligence Report</div>
-              <h2 className="mt-1 text-xl font-bold text-ink">Global Threat Assessment</h2>
+              <h2 className="mt-1 text-xl font-bold text-ink">Overseas Risk Assessment</h2>
             </div>
             <div className="text-right text-[11px] text-ink-mute">
               <div>As of Jul 14, 2026</div>

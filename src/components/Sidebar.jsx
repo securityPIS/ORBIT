@@ -39,9 +39,18 @@ export default function Sidebar() {
           <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-brand/25 to-brand-deep/10 ring-1 ring-brand/30">
             <Globe2 className="h-5 w-5 text-brand" />
           </div>
-          <div className="min-w-0 leading-tight">
+          {/* The strip is too narrow for the full expansion, so it wraps to two
+              lines here and the title carries the whole name. */}
+          <div
+            className="min-w-0 leading-tight"
+            title="ORBIT — Overseas Risk Based Intelligence Tools"
+          >
             <div className="text-[15px] font-bold tracking-tight text-ink">ORBIT</div>
-            <div className="truncate text-[10px] font-medium uppercase tracking-[0.14em] text-ink-mute">Threat Intelligence</div>
+            <div className="whitespace-nowrap text-[8px] font-medium uppercase leading-[1.3] tracking-[0.04em] text-ink-mute">
+              Overseas Risk Based
+              <br />
+              Intelligence Tools
+            </div>
           </div>
           <button
             onClick={toggleSidebar}

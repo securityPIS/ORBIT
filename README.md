@@ -1,4 +1,4 @@
-# ORBIT — Global Threat Intelligence (PWA)
+# ORBIT — Overseas Risk Based Intelligence Tools (PWA)
 
 An installable Progressive Web App for mapping worldwide risk hotspots. The main
 view is a dark, interactive 2D world map where locations are plotted by severity;

@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "ORBIT — Global threat intelligence & risk mapping PWA",
+  "description": "ORBIT — Overseas Risk Based Intelligence Tools (PWA)",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

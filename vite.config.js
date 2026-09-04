@@ -9,10 +9,10 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icons/maskable.svg'],
       manifest: {
-        name: 'ORBIT — Global Threat Intelligence',
+        name: 'ORBIT — Overseas Risk Based Intelligence Tools',
         short_name: 'ORBIT',
         description:
-          'Global risk mapping and threat intelligence, powered by AI analysis of uploaded documents.',
+          'Overseas Risk Based Intelligence Tools — voyage risk assessment and risk mapping, powered by AI analysis of uploaded documents.',
         theme_color: '#0a0e1a',
         background_color: '#0a0e1a',
         display: 'standalone',
