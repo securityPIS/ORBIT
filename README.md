@@ -71,6 +71,9 @@ The Route Analysis sidebar is three tabs over one assessment:
   get several genuinely different routings, each with the case for and against
   it: distance, transit time, bunkers, canal tolls, war-risk premium, and how
   close the track runs to every assessed threat zone. See below.
+- **Executive brief** — one click after an analysis writes the whole voyage up
+  as an editable, Word-style document: macro, meso and micro, printable and
+  downloadable as a PDF. See below.
 - **Full workspace** — Dashboard (KPIs + heatmap), Global Map, Route Analysis,
   Risk Feed, Document Library, AI Analysis, Alerts, Reports (printable),
   Settings.
@@ -137,20 +140,63 @@ containment:
 node scripts/check-routes.mjs
 ```
 
+## Executive brief
+
+The **Executive Brief** button on Route Analysis goes live once an analysis has
+produced at least one routing. It writes the voyage up as a document and opens
+it in a Word-style editor: a white A4 page, serif body text, and **every line
+editable in place** — the auto-generated title included. Editing is plain text
+against the document model, and the margin controls on each block add a
+paragraph, add a bullet list, or delete the block; tables grow and shrink by the
+row.
+
+The document is written from the analysis, in three levels:
+
+- **Macro** — the global risk environment: mean index, critical and high bands,
+  where the weight sits by region, dominant threat vectors, emerging reporting,
+  and whether any of it touches this voyage's corridor.
+- **Meso** — one sub-section per candidate routing, so the alternatives are
+  compared rather than assumed. Each covers its **waters** (regulated passages
+  with transit times and tolls, seaborne threat zones and closest approach,
+  time spent in high-risk water, war-risk areas entered) and its **landside**
+  (every port call scored, the hinterland picture around it, and any shore-based
+  threat projecting onto the track).
+- **Micro** — mitigating *this vessel* over the recommended routing: particulars,
+  passages closed at her dimensions, the exposure register behind the impact
+  axis, the 5 × 5 rating, and a control set drawn from the threat vectors the
+  routing actually meets — ship hardening, conflict-transit discipline, GNSS and
+  cyber resilience, port-call exposure — plus the triggers that invalidate the
+  brief.
+
+Two ways out of it, both from the toolbar:
+
+- **Print** swaps the app shell for a print-only copy of the same document
+  (rendered by the same component, so the two cannot drift), laid out for A4.
+- **Download PDF** writes a real PDF with jsPDF — text, not a screenshot, so it
+  stays selectable and searchable — paginating tables with repeated headers and
+  stamping a running header and page numbers.
+
+The brief is generated once and then edited: it survives navigating away and
+back. Change the voyage and the page says so, with a **Regenerate** that rewrites
+it from the new analysis.
+
 ## Stack
 
 React 18 · Vite 5 · Tailwind CSS 3 · Zustand · d3-geo + world-atlas · lucide-react
-· vite-plugin-pwa (Workbox).
+· jsPDF (brief export) · vite-plugin-pwa (Workbox).
 
 ## Project layout
 
 ```
 src/
-  lib/         constants, geo projection, time/date math, analysis engine, routing
+  lib/         constants, geo projection, time/date math, analysis engine, routing,
+               executive-brief generator + PDF writer
   data/        seed locations, incidents, documents, sea lanes,
                maritime reference data, generated ocean grid
   store/       Zustand store + selectors (filtering, date interpolation, upload)
-  components/  map, route map/controls/cards, panels, charts, UI primitives
-  pages/       MapView + Route/Dashboard/Feed/Documents/Analysis/Alerts/Reports/Settings
+  components/  map, route map/controls/cards, brief document, panels, charts,
+               UI primitives
+  pages/       MapView + Route/ExecutiveBrief/Dashboard/Feed/Documents/Analysis/
+               Alerts/Reports/Settings
 scripts/       ocean-graph generator + route verification suite
 ```

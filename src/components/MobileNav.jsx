@@ -16,7 +16,7 @@ export default function MobileNav() {
   return (
     <nav className="flex items-center justify-around border-t border-hair/70 bg-abyss/90 px-2 py-1.5 backdrop-blur md:hidden">
       {ITEMS.map(({ key, label, icon: Icon }) => {
-        const active = view === key
+        const active = view === key || (key === 'routes' && view === 'brief')
         return (
           <button key={key} onClick={() => setView(key)} className={`flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1.5 ${active ? 'text-brand' : 'text-ink-mute'}`}>
             <Icon className="h-[18px] w-[18px]" />

@@ -1,9 +1,9 @@
-import { Navigation, Info, PanelLeftClose, PanelLeft, PanelRightClose, PanelRight } from 'lucide-react'
+import { Navigation, Info, PanelLeftClose, PanelLeft, PanelRightClose, PanelRight, FileText } from 'lucide-react'
 import PageShell from '../components/PageShell'
 import RouteMap, { ROUTE_COLORS } from '../components/RouteMap'
 import RouteControls from '../components/RouteControls'
 import RouteCard from '../components/RouteCard'
-import { useStore } from '../store/useStore'
+import { useStore, selectBriefReady } from '../store/useStore'
 import { fmtShort } from '../lib/time'
 
 function PanelToggle({ on, onClick, label, iconOn: IconOn, iconOff: IconOff }) {
@@ -93,6 +93,12 @@ export default function RoutePage() {
   const showVoyage = useStore((s) => s.routePanels.voyage)
   const showRouting = useStore((s) => s.routePanels.routing)
   const toggleRoutePanel = useStore((s) => s.toggleRoutePanel)
+  const openBrief = useStore((s) => s.openExecutiveBrief)
+  const hasBrief = useStore((s) => !!s.brief.doc)
+  const briefReady = useStore(selectBriefReady)
+  // The button goes live with the analysis, and stays live afterwards so a
+  // brief already written is never stranded behind a cleared result.
+  const canBrief = briefReady || hasBrief
   const result = route.result
 
   const cols =
@@ -111,6 +117,27 @@ export default function RoutePage() {
       icon={Navigation}
       actions={
         <>
+          <button
+            onClick={openBrief}
+            disabled={!canBrief}
+            title={
+              briefReady
+                ? hasBrief
+                  ? 'Open the executive brief written from this analysis'
+                  : 'Generate an executive brief from this analysis'
+                : hasBrief
+                  ? 'Open the brief written earlier — re-run the analysis to refresh its figures'
+                  : 'Run the route analysis first — the brief is written from its output'
+            }
+            className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-[12.5px] font-bold transition-all ${
+              canBrief
+                ? 'bg-gradient-to-b from-brand to-brand-deep text-[#04121e] shadow-glow hover:brightness-110'
+                : 'cursor-not-allowed border border-hair bg-panel-2/40 text-ink-mute'
+            }`}
+          >
+            <FileText className="h-4 w-4" />
+            <span className="hidden sm:block">Executive Brief</span>
+          </button>
           <PanelToggle
             on={showVoyage}
             onClick={() => toggleRoutePanel('voyage')}

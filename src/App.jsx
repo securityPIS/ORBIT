@@ -8,6 +8,7 @@ import StatusBar from './components/StatusBar'
 import Toasts from './components/Toasts'
 import MapView from './pages/MapView'
 import RoutePage from './pages/RoutePage'
+import ExecutiveBriefPage from './pages/ExecutiveBriefPage'
 import DashboardPage from './pages/DashboardPage'
 import FeedPage from './pages/FeedPage'
 import DocumentsPage from './pages/DocumentsPage'
@@ -19,6 +20,7 @@ import SettingsPage from './pages/SettingsPage'
 const VIEWS = {
   map: MapView,
   routes: RoutePage,
+  brief: ExecutiveBriefPage,
   dashboard: DashboardPage,
   feed: FeedPage,
   documents: DocumentsPage,

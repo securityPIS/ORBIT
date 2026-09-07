@@ -7,6 +7,7 @@ import { addDays, dayKey, scoreAsOf, PRESETS, toDate } from '../lib/time'
 import { planVoyage } from '../lib/routing'
 import { computeImpact, computeLikelihood, computeRating, DEFAULT_IMPACT_THRESHOLDS } from '../lib/riskRating'
 import { VESSEL_PRESETS, DEFAULT_BUNKER_USD, portById } from '../data/maritime'
+import { buildExecutiveBrief, briefSourceKey, newBlock } from '../lib/executiveBrief'
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 const uid = (p) => p + Math.random().toString(36).slice(2, 9)
@@ -120,6 +121,14 @@ export const useStore = create((set, get) => ({
   /** Which side panels the route page keeps on screen. */
   routePanels: { voyage: true, routing: true },
   toggleRoutePanel: (key) => set((s) => ({ routePanels: { ...s.routePanels, [key]: !s.routePanels[key] } })),
+
+  /**
+   * The working executive brief. One document at a time: it is generated from a
+   * finished analysis and then edited in place, so edits survive navigating away
+   * and back. `sourceKey` fingerprints the analysis it was written from, which
+   * is how the page knows to offer a regeneration once the voyage moves on.
+   */
+  brief: { doc: null, sourceKey: null },
 
   // --- navigation & selection ---
   setView: (view) => set({ view }),
@@ -272,6 +281,89 @@ export const useStore = create((set, get) => ({
     }
   },
 
+  // --- executive brief ------------------------------------------------------
+
+  /** Writes a fresh brief from the current analysis and opens it. */
+  generateExecutiveBrief: () => {
+    const state = get()
+    const { route, locations, asOf, incidents, emerging, documents, preset } = state
+    const result = route.result
+    if (!result || result.error || !result.routes?.length) {
+      get().addToast({
+        kind: 'error',
+        title: 'Nothing to brief yet',
+        body: 'Run the route analysis first — the brief is written from its output.',
+      })
+      return
+    }
+
+    const dated = locations.map((l) => annotate(l, asOf)).filter(Boolean)
+    const doc = buildExecutiveBrief({
+      result,
+      assessment: selectRiskAssessment(state),
+      route,
+      dated,
+      incidents,
+      emerging,
+      documents,
+      asOf,
+      preset,
+    })
+
+    set({
+      brief: { doc, sourceKey: briefSourceKey({ route, result, asOf }) },
+      view: 'brief',
+    })
+    get().addToast({
+      kind: 'success',
+      title: 'Executive brief generated',
+      body: `${doc.sections.length} sections written from ${result.routes.length} candidate routing${result.routes.length === 1 ? '' : 's'}. Every line on the page is editable.`,
+    })
+  },
+
+  /** Opens the brief, writing one the first time it is asked for. */
+  openExecutiveBrief: () => {
+    if (get().brief.doc) set({ view: 'brief' })
+    else get().generateExecutiveBrief()
+  },
+
+  updateBriefDoc: (patch) =>
+    set((s) => (s.brief.doc ? { brief: { ...s.brief, doc: { ...s.brief.doc, ...patch } } } : {})),
+
+  updateBriefSection: (sectionId, patch) =>
+    set((s) => mapBriefSections(s, (sec) => (sec.id === sectionId ? { ...sec, ...patch } : sec))),
+
+  updateBriefBlock: (sectionId, blockId, patch) =>
+    set((s) =>
+      mapBriefSections(s, (sec) =>
+        sec.id !== sectionId
+          ? sec
+          : { ...sec, blocks: sec.blocks.map((b) => (b.id === blockId ? { ...b, ...patch } : b)) }
+      )
+    ),
+
+  /** Inserts a block after `afterBlockId` and returns its id, so the editor can focus it. */
+  addBriefBlock: (sectionId, afterBlockId, type = 'paragraph') => {
+    const block = newBlock(type)
+    set((s) =>
+      mapBriefSections(s, (sec) => {
+        if (sec.id !== sectionId) return sec
+        const i = sec.blocks.findIndex((b) => b.id === afterBlockId)
+        const blocks = [...sec.blocks]
+        blocks.splice(i < 0 ? blocks.length : i + 1, 0, block)
+        return { ...sec, blocks }
+      })
+    )
+    return block.id
+  },
+
+  removeBriefBlock: (sectionId, blockId) =>
+    set((s) =>
+      mapBriefSections(s, (sec) =>
+        sec.id !== sectionId ? sec : { ...sec, blocks: sec.blocks.filter((b) => b.id !== blockId) }
+      )
+    ),
+
   addToast: (t) => {
     const id = uid('t-')
     set((s) => ({ toasts: [...s.toasts, { id, ...t }] }))
@@ -368,6 +460,25 @@ export const useStore = create((set, get) => ({
 }))
 
 // ---- pure selectors -------------------------------------------------------
+
+/** Rewrites every section of the working brief through `fn`. */
+function mapBriefSections(state, fn) {
+  if (!state.brief.doc) return {}
+  return { brief: { ...state.brief, doc: { ...state.brief.doc, sections: state.brief.doc.sections.map(fn) } } }
+}
+
+/** An analysis is on screen and produced at least one routing to brief on. */
+export function selectBriefReady(state) {
+  const r = state.route.result
+  return !!(r && !r.error && r.routes?.length)
+}
+
+/** The brief no longer describes the analysis currently on screen. */
+export function selectBriefStale(state) {
+  if (!state.brief.doc || !selectBriefReady(state)) return false
+  return state.brief.sourceKey !== briefSourceKey({ route: state.route, result: state.route.result, asOf: state.asOf })
+}
+
 
 export function getWindow(preset) {
   const p = PRESETS.find((x) => x.key === preset) || PRESETS[2]

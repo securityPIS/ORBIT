@@ -65,7 +65,9 @@ export default function Sidebar() {
         {/* nav */}
         <nav className="flex-1 space-y-0.5 px-3 py-2">
           {NAV.map(({ key, label, icon: Icon }) => {
-            const active = view === key
+            // The executive brief is opened from route analysis and has no rail
+            // entry of its own, so the rail keeps pointing at where it came from.
+            const active = view === key || (key === 'routes' && view === 'brief')
             return (
               <button
                 key={key}
